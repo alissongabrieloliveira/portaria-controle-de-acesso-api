@@ -24,6 +24,15 @@ async function registrarUsuario({
   }
 }
 
+// Busca por usuário
+async function buscarUsuarioPorUsername(usuario) {
+  const query = `SELECT * FROM usuarios WHERE usuario = $1`;
+  const values = [usuario];
+  const { rows } = await db.query(query, values);
+  return rows[0]; // pode retornar undefined
+}
+
 module.exports = {
   registrarUsuario,
+  buscarUsuarioPorUsername,
 };
