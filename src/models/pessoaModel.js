@@ -48,8 +48,34 @@ async function cadastrarPessoa({
   }
 }
 
+// Atualiza dados de uma pessoa especifico
+async function atualizarPessoa(
+  id,
+  { nome, sobrenome, cpf, telefone, tipo_pessoa }
+) {
+  const query = `
+    UPDATE pessoas
+    SET nome = $1,
+        sobrenome = $2,
+        cpf = $3,
+        telefone = $4,
+        tipo_pessoa = $5
+    WHERE id = $6
+    RETURNING *;
+  `;
+  const values = [nome, sobrenome, cpf, telefone, tipo_pessoa, id];
+
+  try {
+    const { rows } = await db.query(query, values);
+    return rows[0]; // undefined se não encontrada
+  } catch (error) {
+    throw error;
+  }
+}
+
 module.exports = {
   listarPessoas,
   buscarPessoaPorId,
   cadastrarPessoa,
+  atualizarPessoa,
 };

@@ -2,6 +2,7 @@ const {
   listarPessoas,
   buscarPessoaPorId,
   cadastrarPessoa,
+  atualizarPessoa,
 } = require("../models/pessoaModel");
 
 // GET lista todas as pessoas
@@ -75,8 +76,58 @@ async function cadastrar(req, res) {
   }
 }
 
+// PUT atualiza dados de uma pessoa especifica
+async function atualizar(req, res) {
+  const { id } = req.params;
+  const { nome, sobrenome, cpf, telefone, tipo_pessoa } = req.body;
+
+  if (!id || isNaN(id)) {
+    return res.status(400).json({ error: "ID inválido." });
+  }
+
+  if (!nome || !sobrenome || !cpf || !tipo_pessoa) {
+    return res.status(400).json({
+      error: "Campos obrigatórios: nome, sobrenome, cpf, tipo_pessoa.",
+    });
+  }
+
+  const tiposValidos = ["colaborador", "visitante", "prestador de serviço"];
+  if (!tiposValidos.includes(tipo_pessoa)) {
+    return res.status(400).json({ error: "Tipo de pessoa inválido." });
+  }
+
+  try {
+    const pessoaAtualizada = await atualizarPessoa(id, {
+      nome,
+      sobrenome,
+      cpf,
+      telefone: telefone || null,
+      tipo_pessoa,
+    });
+
+    if (!pessoaAtualizada) {
+      return res.status(404).json({ error: "Pessoa não encontrada." });
+    }
+
+    res.status(200).json({
+      message: "Pessoa atualizada com sucesso.",
+      pessoa: pessoaAtualizada,
+    });
+  } catch (err) {
+    if (err.code === "23505") {
+      return res
+        .status(409)
+        .json({ error: "CPF já cadastrado para outra pessoa." });
+    }
+
+    console.error("Erro ao atualizar pessoa:", err);
+    res.status(500).json({ error: "Erro ao atualizar pessoa." });
+  }
+}
+
 module.exports = {
   listar,
   buscarPorId,
   cadastrar,
+  atualizar,
 };
