@@ -1,4 +1,8 @@
-const { listarPessoas, buscarPessoaPorId } = require("../models/pessoaModel");
+const {
+  listarPessoas,
+  buscarPessoaPorId,
+  cadastrarPessoa,
+} = require("../models/pessoaModel");
 
 // GET lista todas as pessoas
 async function listar(req, res) {
@@ -33,7 +37,46 @@ async function buscarPorId(req, res) {
   }
 }
 
+// POST cadastra uma nova pessoa
+async function cadastrar(req, res) {
+  const { nome, sobrenome, cpf, telefone, tipo_pessoa } = req.body;
+
+  if (!nome || !sobrenome || !cpf || !tipo_pessoa) {
+    return res.status(400).json({
+      error: "Campos obrigatórios: nome, sobrenome, cpf, tipo_pessoa.",
+    });
+  }
+
+  const tiposValidos = ["colaborador", "visitante", "prestador de serviço"];
+  if (!tiposValidos.includes(tipo_pessoa)) {
+    return res.status(400).json({ error: "Tipo de pessoa inválido." });
+  }
+
+  try {
+    const novaPessoa = await cadastrarPessoa({
+      nome,
+      sobrenome,
+      cpf,
+      telefone: telefone || null,
+      tipo_pessoa,
+    });
+
+    res.status(201).json({
+      message: "Pessoa cadastrada com sucesso.",
+      pessoa: novaPessoa,
+    });
+  } catch (err) {
+    if (err.code === "23505") {
+      return res.status(409).json({ error: "CPF já cadastrado." });
+    }
+
+    console.error("Erro ao cadastrar pessoa:", err);
+    res.status(500).json({ error: "Erro ao cadastrar pessoa." });
+  }
+}
+
 module.exports = {
   listar,
   buscarPorId,
+  cadastrar,
 };

@@ -25,7 +25,31 @@ async function buscarPessoaPorId(id) {
   }
 }
 
+// Cadastra uma nova pessoa
+async function cadastrarPessoa({
+  nome,
+  sobrenome,
+  cpf,
+  telefone,
+  tipo_pessoa,
+}) {
+  const query = `
+    INSERT INTO pessoas (nome, sobrenome, cpf, telefone, tipo_pessoa)
+    VALUES ($1, $2, $3, $4, $5)
+    RETURNING *;
+  `;
+  const values = [nome, sobrenome, cpf, telefone, tipo_pessoa];
+
+  try {
+    const { rows } = await db.query(query, values);
+    return rows[0];
+  } catch (error) {
+    throw error;
+  }
+}
+
 module.exports = {
   listarPessoas,
   buscarPessoaPorId,
+  cadastrarPessoa,
 };
