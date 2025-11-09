@@ -1,4 +1,4 @@
-const { listarPessoas } = require("../models/pessoaModel");
+const { listarPessoas, buscarPessoaPorId } = require("../models/pessoaModel");
 
 // GET lista todas as pessoas
 async function listar(req, res) {
@@ -11,6 +11,29 @@ async function listar(req, res) {
   }
 }
 
+// GET lista um usuário especifico por id
+async function buscarPorId(req, res) {
+  const { id } = req.params;
+
+  if (!id || isNaN(id)) {
+    return res.status(400).json({ error: "ID inválido." });
+  }
+
+  try {
+    const pessoa = await buscarPessoaPorId(id);
+
+    if (!pessoa) {
+      return res.status(404).json({ error: "Pessoa não encontrada." });
+    }
+
+    res.status(200).json({ pessoa });
+  } catch (err) {
+    console.error("Erro ao buscar pessoa:", err);
+    res.status(500).json({ error: "Erro ao buscar pessoa." });
+  }
+}
+
 module.exports = {
   listar,
+  buscarPorId,
 };
