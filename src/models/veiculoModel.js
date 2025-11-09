@@ -48,8 +48,41 @@ async function cadastrarVeiculo({
   }
 }
 
+// Atualiza dados de um veículo existente
+async function atualizarVeiculo(
+  id,
+  { placa, marca, modelo, tipo_veiculo, identificacao_veiculo }
+) {
+  const query = `
+    UPDATE veiculos
+    SET placa = $1,
+        marca = $2,
+        modelo = $3,
+        tipo_veiculo = $4,
+        identificacao_veiculo = $5
+    WHERE id = $6
+    RETURNING *;
+  `;
+  const values = [
+    placa,
+    marca,
+    modelo,
+    tipo_veiculo,
+    identificacao_veiculo,
+    id,
+  ];
+
+  try {
+    const { rows } = await db.query(query, values);
+    return rows[0]; // pode retornar undefined
+  } catch (error) {
+    throw error;
+  }
+}
+
 module.exports = {
   listarVeiculos,
   buscarVeiculoPorId,
   cadastrarVeiculo,
+  atualizarVeiculo,
 };

@@ -4,6 +4,7 @@ const {
   listar,
   buscarPorId,
   cadastrar,
+  atualizar,
 } = require("../controllers/veiculoController");
 const autenticarToken = require("../middlewares/authMiddleware"); // proteção com JWT
 
@@ -11,5 +12,6 @@ const autenticarToken = require("../middlewares/authMiddleware"); // proteção 
 router.get("/cadastro-veiculos", autenticarToken, listar);
 router.get("/cadastro-veiculos/:id", autenticarToken, buscarPorId);
 router.post("/cadastro-veiculos", autenticarToken, cadastrar);
+router.put("/cadastro-veiculos/:id", autenticarToken, atualizar);
 
 module.exports = router;

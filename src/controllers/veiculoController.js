@@ -2,6 +2,7 @@ const {
   listarVeiculos,
   buscarVeiculoPorId,
   cadastrarVeiculo,
+  atualizarVeiculo,
 } = require("../models/veiculoModel");
 
 // GET lista todos os veículos
@@ -82,8 +83,64 @@ async function cadastrar(req, res) {
   }
 }
 
+// PUT atualiza dados de um veículo especifico
+async function atualizar(req, res) {
+  const { id } = req.params;
+  const { placa, marca, modelo, tipo_veiculo, identificacao_veiculo } =
+    req.body;
+
+  if (!id || isNaN(id)) {
+    return res.status(400).json({ error: "ID inválido." });
+  }
+
+  if (!placa || !marca || !modelo || !tipo_veiculo) {
+    return res.status(400).json({
+      error: "Campos obrigatórios: placa, marca, modelo e tipo_veiculo.",
+    });
+  }
+
+  const tiposValidos = [
+    "frota própria",
+    "visitante",
+    "colaborador",
+    "prestador de serviço",
+  ];
+  if (!tiposValidos.includes(tipo_veiculo)) {
+    return res.status(400).json({ error: "Tipo de veículo inválido." });
+  }
+
+  try {
+    const veiculoAtualizado = await atualizarVeiculo(id, {
+      placa,
+      marca,
+      modelo,
+      tipo_veiculo,
+      identificacao_veiculo: identificacao_veiculo || null,
+    });
+
+    if (!veiculoAtualizado) {
+      return res.status(404).json({ error: "Veículo não encontrado." });
+    }
+
+    res.status(200).json({
+      message: "Veículo atualizado com sucesso.",
+      veiculo: veiculoAtualizado,
+    });
+  } catch (err) {
+    if (err.code === "23505") {
+      return res
+        .status(409)
+        .json({ error: "Placa já está em uso por outro veículo." });
+    }
+
+    console.error("Erro ao atualizar veículo:", err);
+    res.status(500).json({ error: "Erro ao atualizar veículo." });
+  }
+}
+
 module.exports = {
   listar,
   buscarPorId,
   cadastrar,
+  atualizar,
 };
