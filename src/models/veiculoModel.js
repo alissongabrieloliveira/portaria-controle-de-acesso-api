@@ -25,7 +25,31 @@ async function buscarVeiculoPorId(id) {
   }
 }
 
+// Cadastro um novo veículo
+async function cadastrarVeiculo({
+  placa,
+  marca,
+  modelo,
+  tipo_veiculo,
+  identificacao_veiculo,
+}) {
+  const query = `
+    INSERT INTO veiculos (placa, marca, modelo, tipo_veiculo, identificacao_veiculo)
+    VALUES ($1, $2, $3, $4, $5)
+    RETURNING *;
+  `;
+  const values = [placa, marca, modelo, tipo_veiculo, identificacao_veiculo];
+
+  try {
+    const { rows } = await db.query(query, values);
+    return rows[0];
+  } catch (error) {
+    throw error;
+  }
+}
+
 module.exports = {
   listarVeiculos,
   buscarVeiculoPorId,
+  cadastrarVeiculo,
 };

@@ -1,6 +1,7 @@
 const {
   listarVeiculos,
   buscarVeiculoPorId,
+  cadastrarVeiculo,
 } = require("../models/veiculoModel");
 
 // GET lista todos os veículos
@@ -36,7 +37,53 @@ async function buscarPorId(req, res) {
   }
 }
 
+// POST cadastra um novo veículo
+async function cadastrar(req, res) {
+  const { placa, marca, modelo, tipo_veiculo, identificacao_veiculo } =
+    req.body;
+
+  const tiposValidos = [
+    "frota própria",
+    "visitante",
+    "colaborador",
+    "prestador de serviço",
+  ];
+
+  if (!placa || !marca || !modelo || !tipo_veiculo) {
+    return res.status(400).json({
+      error: "Campos obrigatórios: placa, marca, modelo e tipo_veiculo.",
+    });
+  }
+
+  if (!tiposValidos.includes(tipo_veiculo)) {
+    return res.status(400).json({ error: "Tipo de veículo inválido." });
+  }
+
+  try {
+    const novoVeiculo = await cadastrarVeiculo({
+      placa,
+      marca,
+      modelo,
+      tipo_veiculo,
+      identificacao_veiculo: identificacao_veiculo || null,
+    });
+
+    res.status(201).json({
+      message: "Veículo cadastrado com sucesso.",
+      veiculo: novoVeiculo,
+    });
+  } catch (err) {
+    if (err.code === "23505") {
+      return res.status(409).json({ error: "Placa já cadastrada." });
+    }
+
+    console.error("Erro ao cadastrar veículo:", err);
+    res.status(500).json({ error: "Erro ao cadastrar veículo." });
+  }
+}
+
 module.exports = {
   listar,
   buscarPorId,
+  cadastrar,
 };
