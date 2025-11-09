@@ -80,9 +80,23 @@ async function atualizarVeiculo(
   }
 }
 
+// Deleta um veículo especifico
+async function deletarVeiculo(id) {
+  const query = `DELETE FROM veiculos WHERE id = $1 RETURNING *`;
+  const values = [id];
+
+  try {
+    const { rows } = await db.query(query, values);
+    return rows[0]; // se existir, retorna o veículo excluído
+  } catch (error) {
+    throw error;
+  }
+}
+
 module.exports = {
   listarVeiculos,
   buscarVeiculoPorId,
   cadastrarVeiculo,
   atualizarVeiculo,
+  deletarVeiculo,
 };

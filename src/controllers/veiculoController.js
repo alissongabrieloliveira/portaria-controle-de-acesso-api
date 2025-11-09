@@ -3,6 +3,7 @@ const {
   buscarVeiculoPorId,
   cadastrarVeiculo,
   atualizarVeiculo,
+  deletarVeiculo,
 } = require("../models/veiculoModel");
 
 // GET lista todos os veículos
@@ -138,9 +139,35 @@ async function atualizar(req, res) {
   }
 }
 
+// DELETE deleta um veículo especifico
+async function deletar(req, res) {
+  const { id } = req.params;
+
+  if (!id || isNaN(id)) {
+    return res.status(400).json({ error: "ID inválido." });
+  }
+
+  try {
+    const veiculoExcluido = await deletarVeiculo(id);
+
+    if (!veiculoExcluido) {
+      return res.status(404).json({ error: "Veículo não encontrado." });
+    }
+
+    res.status(200).json({
+      message: "Veículo excluído com sucesso.",
+      veiculo: veiculoExcluido,
+    });
+  } catch (err) {
+    console.error("Erro ao excluir veículo:", err);
+    res.status(500).json({ error: "Erro ao excluir veículo." });
+  }
+}
+
 module.exports = {
   listar,
   buscarPorId,
   cadastrar,
   atualizar,
+  deletar,
 };
