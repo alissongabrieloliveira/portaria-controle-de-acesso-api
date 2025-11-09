@@ -73,9 +73,23 @@ async function atualizarPessoa(
   }
 }
 
+// Delata uma pessoa especifica
+async function deletarPessoa(id) {
+  const query = `DELETE FROM pessoas WHERE id = $1 RETURNING *`;
+  const values = [id];
+
+  try {
+    const { rows } = await db.query(query, values);
+    return rows[0]; // se não existir, retorna undefined
+  } catch (error) {
+    throw error;
+  }
+}
+
 module.exports = {
   listarPessoas,
   buscarPessoaPorId,
   cadastrarPessoa,
   atualizarPessoa,
+  deletarPessoa,
 };
