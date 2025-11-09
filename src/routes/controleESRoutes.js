@@ -4,6 +4,7 @@ const {
   listar,
   buscarEntrada,
   registrar,
+  registrarSaidaHandler,
 } = require("../controllers/controleESController");
 const autenticarToken = require("../middlewares/authMiddleware");
 
@@ -11,5 +12,6 @@ const autenticarToken = require("../middlewares/authMiddleware");
 router.get("/controle-entradas-saidas", autenticarToken, listar);
 router.get("/buscar-entrada/:id", autenticarToken, buscarEntrada);
 router.post("/registrar-entrada", autenticarToken, registrar);
+router.patch("/registrar-saida/:id", autenticarToken, registrarSaidaHandler);
 
 module.exports = router;

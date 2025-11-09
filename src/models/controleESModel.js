@@ -89,8 +89,30 @@ async function registrarEntrada({
   }
 }
 
+// Registra a saída de uma entrada especifica por id
+async function registrarSaida(id, { km_final, id_usuario_saida }) {
+  const query = `
+    UPDATE controle_entradas_saidas
+    SET
+      km_final = $1,
+      data_hora_saida = CURRENT_TIMESTAMP,
+      id_usuario_saida = $2
+    WHERE id = $3
+    RETURNING *;
+  `;
+  const values = [km_final || null, id_usuario_saida, id];
+
+  try {
+    const { rows } = await db.query(query, values);
+    return rows[0];
+  } catch (error) {
+    throw error;
+  }
+}
+
 module.exports = {
   listarMovimentacoes,
   buscarEntradaPorId,
   registrarEntrada,
+  registrarSaida,
 };

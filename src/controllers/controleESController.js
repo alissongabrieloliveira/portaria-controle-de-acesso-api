@@ -2,6 +2,7 @@ const {
   listarMovimentacoes,
   buscarEntradaPorId,
   registrarEntrada,
+  registrarSaida,
 } = require("../models/controleESModel");
 
 // GET lista todas as movimentações
@@ -77,8 +78,43 @@ async function registrar(req, res) {
   }
 }
 
+// PATCH atualiza a saída de uma entrada especifica por id
+async function registrarSaidaHandler(req, res) {
+  const { id } = req.params;
+  const { km_final } = req.body;
+  const id_usuario_saida = req.usuario?.id;
+
+  if (!id || isNaN(id)) {
+    return res.status(400).json({ error: "ID inválido." });
+  }
+
+  if (!id_usuario_saida) {
+    return res.status(401).json({ error: "Usuário não autenticado." });
+  }
+
+  try {
+    const resultado = await registrarSaida(id, {
+      km_final: km_final || null,
+      id_usuario_saida,
+    });
+
+    if (!resultado) {
+      return res.status(404).json({ error: "Movimentação não encontrada." });
+    }
+
+    res.status(200).json({
+      message: "Saída registrada com sucesso.",
+      movimentacao: resultado,
+    });
+  } catch (err) {
+    console.error("Erro ao registrar saída:", err);
+    res.status(500).json({ error: "Erro ao registrar saída." });
+  }
+}
+
 module.exports = {
   listar,
   buscarEntrada,
   registrar,
+  registrarSaidaHandler,
 };
