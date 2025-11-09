@@ -52,7 +52,45 @@ async function buscarEntradaPorId(id) {
   }
 }
 
+// Registra uma nova entrada
+async function registrarEntrada({
+  km_inicial,
+  id_usuario_entrada,
+  id_posto_controle,
+  id_veiculo,
+  id_setor_visitado,
+  motivo,
+}) {
+  const query = `
+    INSERT INTO controle_entradas_saidas (
+      km_inicial,
+      id_usuario_entrada,
+      id_posto_controle,
+      id_veiculo,
+      id_setor_visitado,
+      motivo
+    ) VALUES ($1, $2, $3, $4, $5, $6)
+    RETURNING *;
+  `;
+  const values = [
+    km_inicial || null,
+    id_usuario_entrada,
+    id_posto_controle,
+    id_veiculo || null,
+    id_setor_visitado,
+    motivo || null,
+  ];
+
+  try {
+    const { rows } = await db.query(query, values);
+    return rows[0];
+  } catch (error) {
+    throw error;
+  }
+}
+
 module.exports = {
   listarMovimentacoes,
   buscarEntradaPorId,
+  registrarEntrada,
 };

@@ -1,6 +1,7 @@
 const {
   listarMovimentacoes,
   buscarEntradaPorId,
+  registrarEntrada,
 } = require("../models/controleESModel");
 
 // GET lista todas as movimentações
@@ -36,7 +37,48 @@ async function buscarEntrada(req, res) {
   }
 }
 
+// POST registra uma nova entrada
+async function registrar(req, res) {
+  const {
+    km_inicial,
+    id_posto_controle,
+    id_veiculo,
+    id_setor_visitado,
+    motivo,
+  } = req.body;
+
+  // usuário autenticado vem do token
+  const id_usuario_entrada = req.usuario?.id;
+
+  if (!id_usuario_entrada || !id_posto_controle || !id_setor_visitado) {
+    return res.status(400).json({
+      error:
+        "Campos obrigatórios: id_posto_controle, id_setor_visitado e token válido.",
+    });
+  }
+
+  try {
+    const novaEntrada = await registrarEntrada({
+      km_inicial: km_inicial || null,
+      id_usuario_entrada,
+      id_posto_controle,
+      id_veiculo: id_veiculo || null,
+      id_setor_visitado,
+      motivo: motivo || null,
+    });
+
+    res.status(201).json({
+      message: "Entrada registrada com sucesso.",
+      entrada: novaEntrada,
+    });
+  } catch (err) {
+    console.error("Erro ao registrar entrada:", err);
+    res.status(500).json({ error: "Erro ao registrar entrada." });
+  }
+}
+
 module.exports = {
   listar,
   buscarEntrada,
+  registrar,
 };
