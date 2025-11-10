@@ -2,6 +2,7 @@ const {
   listarMovimentacoesFrota,
   buscarMovimentacaoFrotaPorId,
   registrarEntradaFrota,
+  associarPessoasNaFrota,
 } = require("../models/controleFrotaModel");
 
 // GET lista todas as movimentações da frota
@@ -45,20 +46,14 @@ async function registrarEntrada(req, res) {
     id_veiculo,
     id_cidade_destino,
     motivo,
+    id_pessoas,
   } = req.body;
 
   const id_usuario_entrada = req.usuario?.id;
 
-  if (
-    !id_usuario_entrada ||
-    !km_inicial ||
-    !id_posto_controle ||
-    !id_veiculo ||
-    !id_cidade_destino
-  ) {
+  if (!id_usuario_entrada || !km_inicial || !id_posto_controle || !id_veiculo) {
     return res.status(400).json({
-      error:
-        "Campos obrigatórios: km_inicial, id_posto_controle, id_veiculo, id_cidade_destino.",
+      error: "Campos obrigatórios: km_inicial, id_posto_controle e id_veiculo.",
     });
   }
 
@@ -68,13 +63,18 @@ async function registrarEntrada(req, res) {
       id_usuario_entrada,
       id_posto_controle,
       id_veiculo,
-      id_cidade_destino,
+      id_cidade_destino: id_cidade_destino || null, // permitido nulo
       motivo,
     });
+
+    if (id_pessoas && Array.isArray(id_pessoas) && id_pessoas.length > 0) {
+      await associarPessoasNaFrota(novaEntrada.id, id_pessoas);
+    }
 
     res.status(201).json({
       message: "Entrada de frota registrada com sucesso.",
       entrada: novaEntrada,
+      pessoas_associadas: id_pessoas || [],
     });
   } catch (err) {
     console.error("Erro ao registrar entrada da frota:", err);
