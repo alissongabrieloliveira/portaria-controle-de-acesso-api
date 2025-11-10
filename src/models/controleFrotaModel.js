@@ -54,7 +54,46 @@ async function buscarMovimentacaoFrotaPorId(id) {
   }
 }
 
+// Registra uma nova entrada da frota
+async function registrarEntradaFrota({
+  km_inicial,
+  id_usuario_entrada,
+  id_posto_controle,
+  id_veiculo,
+  id_cidade_destino,
+  motivo,
+}) {
+  const query = `
+    INSERT INTO controle_frota (
+      km_inicial,
+      id_usuario_entrada,
+      id_posto_controle,
+      id_veiculo,
+      id_cidade_destino,
+      motivo
+    ) VALUES ($1, $2, $3, $4, $5, $6)
+    RETURNING *;
+  `;
+
+  const values = [
+    km_inicial,
+    id_usuario_entrada,
+    id_posto_controle,
+    id_veiculo,
+    id_cidade_destino,
+    motivo || null,
+  ];
+
+  try {
+    const { rows } = await db.query(query, values);
+    return rows[0];
+  } catch (error) {
+    throw error;
+  }
+}
+
 module.exports = {
   listarMovimentacoesFrota,
   buscarMovimentacaoFrotaPorId,
+  registrarEntradaFrota,
 };

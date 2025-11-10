@@ -1,6 +1,7 @@
 const {
   listarMovimentacoesFrota,
   buscarMovimentacaoFrotaPorId,
+  registrarEntradaFrota,
 } = require("../models/controleFrotaModel");
 
 // GET lista todas as movimentações da frota
@@ -36,7 +37,53 @@ async function buscarPorId(req, res) {
   }
 }
 
+// POST registra uma nova entrada da frota
+async function registrarEntrada(req, res) {
+  const {
+    km_inicial,
+    id_posto_controle,
+    id_veiculo,
+    id_cidade_destino,
+    motivo,
+  } = req.body;
+
+  const id_usuario_entrada = req.usuario?.id;
+
+  if (
+    !id_usuario_entrada ||
+    !km_inicial ||
+    !id_posto_controle ||
+    !id_veiculo ||
+    !id_cidade_destino
+  ) {
+    return res.status(400).json({
+      error:
+        "Campos obrigatórios: km_inicial, id_posto_controle, id_veiculo, id_cidade_destino.",
+    });
+  }
+
+  try {
+    const novaEntrada = await registrarEntradaFrota({
+      km_inicial,
+      id_usuario_entrada,
+      id_posto_controle,
+      id_veiculo,
+      id_cidade_destino,
+      motivo,
+    });
+
+    res.status(201).json({
+      message: "Entrada de frota registrada com sucesso.",
+      entrada: novaEntrada,
+    });
+  } catch (err) {
+    console.error("Erro ao registrar entrada da frota:", err);
+    res.status(500).json({ error: "Erro ao registrar entrada da frota." });
+  }
+}
+
 module.exports = {
   listar,
   buscarPorId,
+  registrarEntrada,
 };
