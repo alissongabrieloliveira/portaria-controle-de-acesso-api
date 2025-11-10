@@ -154,9 +154,38 @@ async function associarPessoasNaFrota(id_controle_frota, id_pessoas = []) {
   }
 }
 
+// Registra um movimentação de saída da frota
+async function registrarSaidaFrota({
+  id,
+  km_final,
+  id_usuario_saida,
+  id_cidade_destino,
+}) {
+  const query = `
+    UPDATE controle_frota
+    SET
+      km_final = $1,
+      data_hora_saida = CURRENT_TIMESTAMP,
+      id_usuario_saida = $2,
+      id_cidade_destino = $3
+    WHERE id = $4
+    RETURNING *;
+  `;
+
+  const values = [km_final, id_usuario_saida, id_cidade_destino, id];
+
+  try {
+    const { rows } = await db.query(query, values);
+    return rows[0];
+  } catch (error) {
+    throw error;
+  }
+}
+
 module.exports = {
   listarMovimentacoesFrota,
   buscarMovimentacaoFrotaPorId,
   registrarEntradaFrota,
   associarPessoasNaFrota,
+  registrarSaidaFrota,
 };
